@@ -4,8 +4,12 @@ var map;
 var geocoder;
 
 function geocodeName(geocode) {
-	return geocode.address_components[0].short_name + geocode.address_components[1].short_name;
+	return geocode.address_components[0].short_name + " " + geocode.address_components[1].short_name;
 }
+
+var lastQuery = {};
+
+var sides = {"L": "left", "R": "right"}
 
 function submitForm() {
 	// Canonize address through Google Maps Geocoding API
@@ -33,8 +37,10 @@ function submitForm() {
 				alert("end address is invalid");
 				return;
 			}
-			$.get("/direction", "start=" + encodeURIComponent(geocodeName(startResult))
-				+ "&end=" + encodeURIComponent(geocodeName(results[0])), handleDirectionResponse, "json")
+			lastQuery.start = geocodeName(startResult);
+			lastQuery.end = geocodeName(results[0]);
+			$.get("/direction", "start=" + encodeURIComponent(lastQuery.start)
+				+ "&end=" + encodeURIComponent(lastQuery.end), handleDirectionResponse, "json")
 			.fail(function() {
 				alert("Network error");
 			});
@@ -45,6 +51,27 @@ function submitForm() {
 
 function handleDirectionResponse(data, textStatus, jqXHR) {
 	console.log(data);
+	if (data.error != null) {
+		alert(data.error);
+		return;
+	}
+	$("#direction-length").text("Distance: " + data.length);
+	var parts = [];
+	for (var i = 0; i < data.path.length; i++) {
+		var p = data.path[i];
+		if (p.action == "along") {
+			parts.push($("<div>").text("Head " + p.direction + " along " + p.from.name + " to " + p.to.name));
+		} else if (p.action == "turn") {
+			parts.push($("<div>").text("Turn " +
+				p.direction + " onto " + p.to.name));
+		} else if (p.action == "arrive") {
+			parts.push($("<div>").text(lastQuery.end + " is on the " + sides[p.side]));
+		}
+		if (p.distance) {
+			parts.push($("<div>").text("(" + p.distance + " km)"));
+		}
+	}
+	$("#directions").replaceWith(parts);
 }
 
 function initUi() {
