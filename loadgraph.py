@@ -34,6 +34,7 @@ tcl_from_column = getcolumnindex(tcl_sf, "FNODE")
 tcl_to_column = getcolumnindex(tcl_sf, "TNODE")
 tcl_id_column = getcolumnindex(tcl_sf, "GEO_ID")
 tcl_fcode_column = getcolumnindex(tcl_sf, "FCODE")
+tcl_street_column = getcolumnindex(tcl_sf, "LF_NAME")
 
 intersect_id_column = getcolumnindex(intersect_sf, "INT_ID")
 intersect_lon_column = getcolumnindex(intersect_sf, "LONGITUDE")
@@ -81,7 +82,8 @@ def buildgraph():
         cl_from = centerline[tcl_from_column]
         cl_to = centerline[tcl_to_column]
         cl_length = centerline_length(tcl_sf_shapes[cl_index])
-        G.add_edge(cl_from, cl_to, length=cl_length)
+        cl_street = centerline[tcl_street_column]
+        G.add_edge(cl_from, cl_to, length=cl_length, fr=cl_from, to=cl_to, street=cl_street)
         cl_index += 1
     return G
 
