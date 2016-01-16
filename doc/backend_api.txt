@@ -1,0 +1,36 @@
+## Direction API
+
+GET /direction?start=sdf&end=sdf
+
+Returns: 
+
+JSON object containing:
+error (null if no error, user-readable string if error)
+length of path (-1 if doesn't exist)
+path: array of Instruction
+
+### Instruction: json Object
+
+action: "along", "turn", or "arrive"
+
+for Along or Turn:
+
+from: {
+	name: user-readable name
+	lon: longitude
+	lat: latitude
+}
+to: {
+	name: user-readable name
+	lon: longitude
+	lat: latitude
+	to: "right", "left", "north", "south", "east", or "west"
+}
+
+for Along:
+distance: (distance in km)
+
+for Arrive:
+
+side: "left" or "right"
+
