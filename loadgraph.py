@@ -85,10 +85,4 @@ def buildgraph():
         G.add_edge(cl_from, cl_to, length=cl_length)
         cl_index += 1
     return G
-        
-def solvefile(filename):
-    """
-    Load file with pairs of intersections and calculate shortest path between them
-    """
-    pass
 

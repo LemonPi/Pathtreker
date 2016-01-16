@@ -27,7 +27,7 @@ def shortest_path(g, source, dest):
 		b -- another node index in g
 		"""
 		# lat and lon internally stored in degrees, convert and call function
-		lona, lonb, lata, latb = map(math.radians(), [g[a].lon, g[b].lon, g[a].lat, g[b].lat])		
+		lona, lonb, lata, latb = map(radians, [g.node[a]['lon'], g.node[b]['lon'], g.node[a]['lat'], g.node[b]['lat']])
 		return hav((lona, lata), (lonb, latb))
 
 	# frontier of nodes to explore
@@ -50,7 +50,7 @@ def shortest_path(g, source, dest):
 		if u == dest:
 			break
 
-		for v in g[u].neighbors:
+		for v in g[u]:
 			new_cost = cost[u] + g[u][v]['length']
 			if v not in cost or new_cost < cost[v]:
 				# relax edge with new_cost
