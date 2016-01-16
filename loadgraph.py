@@ -50,8 +50,7 @@ def centerline_length(shape):
     for i in range(len(p) - 1):
         p0 = p[i]
         p1 = p[i + 1]
-        l += util.hav((math.radians(p0[0]), math.radians(p1[1])),
-                       (math.radians(p1[0]), math.radians(p1[1])))
+        l += util.hav(p0, p1)
     return l
 
 def buildgraph():
@@ -73,8 +72,8 @@ def buildgraph():
         intersect_lat = intersect[intersect_lat_column]
         G.add_node(intersect_id, lat=intersect_lat, lon=intersect_lon, record=intersect)
     tcl_sf_shapes = tcl_sf.shapes()
+    cl_index = 0
     for centerline in tcl_sf.iterRecords():
-        cl_index = 0
         cl_type = centerline[tcl_fcode_column]
         if not cl_type in tcl_features:
             cl_index += 1
