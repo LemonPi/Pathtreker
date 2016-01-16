@@ -1,8 +1,14 @@
 from math import sin, cos, asin, sqrt
 
-def hav(lona, lonb, lata, latb):
+def hav(lonlata, lonlatb):
 	# ported from latlontools
 	# assume latitude and longitudes are in radians
+	lona = lonlata[0]
+	lata = lonlata[1]
+
+	lonb = lonlatb[0]
+	latb = lonlatb[1]
+	
 	diff_lat = lata - latb
 	diff_lon = lona - lonb
 
