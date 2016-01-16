@@ -27,8 +27,8 @@ def shortest_path(g, source, dest):
 		b -- another node index in g
 		"""
 		# lat and lon internally stored in degrees, convert and call function
-		lona, lonb, lata, latb = [g.node[a]['lon'], g.node[b]['lon'], g.node[a]['lat'], g.node[b]['lat']]
-		return hav((lona, lata), (lonb, latb))
+		# lona, lonb, lata, latb = [g.node[a]['lon'], g.node[b]['lon'], g.node[a]['lat'], g.node[b]['lat']]
+		return 0 # hav((lona, lata), (lonb, latb))
 
 	# frontier of nodes to explore
 	exploring = queue.PriorityQueue()

@@ -34,3 +34,18 @@ def testfile(graph, input_name, output_name):
 
 def dotest(graph):
 	testfile(graph, "sample_input.txt", "sample_output.txt")
+
+def solveandsavefile(graph, input_name, output_name):
+	costs = solvefile(graph, input_name)
+	with open(output_name, "w", encoding="utf-8") as outfile:
+		for c in costs:
+			print(c, file=outfile)
+
+def main():
+	import loadgraph
+	graph = loadgraph.buildgraph()
+	solveandsavefile(graph, "input11_short", "output11_short")
+	solveandsavefile(graph, "input12_long", "output12_long")
+
+if __name__ == "__main__":
+	main()
