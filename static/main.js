@@ -1,5 +1,5 @@
 (function() {
-var shutmedown = true;
+var shutmedown = false;
 var map;
 var geocoder;
 
@@ -10,6 +10,16 @@ function geocodeName(geocode) {
 var lastQuery = {};
 
 var sides = {"L": "left", "R": "right"}
+
+function roundtotwopoints(a) {
+	return Math.round(a * 100) / 100;
+}
+function rounddist(a) {
+	if (a < 1.5) {
+		return roundtotwopoints(a * 1000) + " m";
+	}
+	return roundtotwopoints(a) + " km";
+}
 
 function submitForm() {
 	// Canonize address through Google Maps Geocoding API
@@ -55,7 +65,7 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 		alert(data.error);
 		return;
 	}
-	$("#direction-length").text("Distance: " + data.length);
+	$("#direction-length").text("Distance: " + rounddist(data.length));
 	var parts = [];
 	for (var i = 0; i < data.path.length; i++) {
 		var p = data.path[i];
@@ -68,8 +78,9 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 			parts.push($("<div>").text(lastQuery.end + " is on the " + sides[p.side]));
 		}
 		if (p.distance) {
-			parts.push($("<div>").text("(" + p.distance + " km)"));
+			parts.push($("<div>").text("(" + rounddist(p.distance) + ")"));
 		}
+		parts.push($("<hr>"));
 	}
 	$("#directions").replaceWith(parts);
 }
