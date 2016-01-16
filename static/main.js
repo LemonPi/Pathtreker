@@ -1,26 +1,63 @@
 (function() {
-var shutmedown = false;
+/**
+ * The main Google Maps instance.
+ * @type google.maps.Map
+ */
 var map;
+/**
+ * The previous path overlaid on the map, if any.
+ * @type google.maps.Polyline
+ */
 var oldPolyline;
+/**
+ * The main Google Maps Geocoder instance.
+ * @type google.maps.Geocoder
+ */ 
 var geocoder;
+
+/**
+ * Gets the short name containing house number and street name from a GeocoderResult
+ */
 
 function geocodeName(geocode) {
 	return geocode.address_components[0].short_name + " " + geocode.address_components[1].short_name;
 }
 
+/**
+ * Stores the canonized start and end address of the last query.
+ */
+
 var lastQuery = {};
 
+/**
+ * Translates side IDs from the API to human-readable sides.
+ */
 var sides = {"L": "left", "R": "right"}
+
+/**
+ * Rounds a number to two decimal points.
+ */
 
 function roundtotwopoints(a) {
 	return Math.round(a * 100) / 100;
 }
+
+/**
+ * Displays a kilometer value intellgently: if the value is less than 1.5 km,
+ * return the value converted to meters and rounded to two decimal places,
+ * otherwise round the kilometer values to two decimal place
+ */
+
 function rounddist(a) {
 	if (a < 1.5) {
 		return roundtotwopoints(a * 1000) + " m";
 	}
 	return roundtotwopoints(a) + " km";
 }
+
+/**
+ * Canonize addresses and submits form to server.
+ */
 
 function submitForm() {
 	// Canonize address through Google Maps Geocoding API
@@ -60,6 +97,10 @@ function submitForm() {
 	return false;
 }
 
+
+/**
+ * Update interface and map from server response.
+ */
 function handleDirectionResponse(data, textStatus, jqXHR) {
 	//console.log(data);
 	if (data.error != null) {
@@ -105,13 +146,19 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 	map.fitBounds(bounds);
 }
 
+/**
+ * Initializes user interface at startup.
+ */
 function initUi() {
 	$("#search-form").on("submit", submitForm);
 }
+
+/**
+ * Called by Google Maps API to initialize the map
+ */
 function initMap() {
 	initUi();
 	geocoder = new google.maps.Geocoder();
-	if (shutmedown) return;
 	map = new google.maps.Map(document.getElementById("map"),
 		{
 			center: {lat: 43.6592125, lng: -79.4386709},
