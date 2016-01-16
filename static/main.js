@@ -61,20 +61,23 @@ function submitForm() {
 }
 
 function handleDirectionResponse(data, textStatus, jqXHR) {
-	console.log(data);
+	//console.log(data);
 	if (data.error != null) {
 		alert(data.error);
 		return;
 	}
 	$("#direction-length").text("Total distance: " + rounddist(data.length) + '\n');
 	var parts = [];
-	var lines = []
+	var lines = [];
+	var bounds = new google.maps.LatLngBounds();
 	for (var i = 0; i < data.path.length; i++) {
 		var p = data.path[i];
 		if (p.action == "along") {
 			parts.push($("<div>").text("Head " + p.direction + " along " + p.from.name + " to " + p.to.name));
 			lines.push({lat: p.from.lat, lng: p.from.lon});
 			lines.push({lat: p.to.lat, lng: p.to.lon});
+			bounds.extend(new google.maps.LatLng({lat: p.from.lat, lng: p.from.lon}))
+			bounds.extend(new google.maps.LatLng({lat: p.to.lat, lng: p.to.lon}))
 		} else if (p.action == "turn") {
 			parts.push($("<div>").text("Turn " +
 				p.direction + " onto " + p.to.name));
@@ -82,7 +85,7 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 			parts.push($("<div>").text(lastQuery.end + " is on the " + sides[p.side]));
 		}
 		if (p.distance) {
-			parts.push($("<div>").text("(" + rounddist(p.distance) + ")"));
+			parts.push($("<div>").text("(" + rounddist(p.distance) + ")").addClass("distances"));
 		}
 		parts.push($("<hr>"));
 	}
@@ -99,6 +102,7 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 	}
 	thepolyline.setMap(map);
 	oldPolyline = thepolyline;
+	map.fitBounds(bounds);
 }
 
 function initUi() {
