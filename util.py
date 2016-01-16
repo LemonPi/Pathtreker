@@ -1,8 +1,8 @@
 import haversine
 
 def hav(lonlata, lonlatb):
-	"""
-	Calculate the Haversine distance in kilometers of two points on Earth
+	"""Calculate the Haversine distance in kilometers of two points on Earth
+	
 	Arguments:
 	lonlata: pair of (lon, lat) in degrees
 	lonlatb: pair of (lon, lat) in degrees

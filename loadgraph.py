@@ -23,9 +23,7 @@ tcl_features = set([
 ])
 
 def getcolumnindex(sf, name):
-    """
-    Get the index of a shapefile's column by name
-    """
+    """Get the index of a shapefile's column by name."""
     for i in range(len(sf.fields)):
         if sf.fields[i][0] == name:
             return (i - 1)
@@ -41,9 +39,7 @@ intersect_lon_column = getcolumnindex(intersect_sf, "LONGITUDE")
 intersect_lat_column = getcolumnindex(intersect_sf, "LATITUDE")
 
 def centerline_length(shape):
-    """
-    Calculate the length of a pyshp line in kilometers using the Haversine formula.
-    """
+    """Calculate the length of a pyshp line in kilometers using the Haversine formula."""
     if shape.shapeType != 3:
         raise Exception("Can't calculate length of non-line shape: " + str(shape.shapeType))
     p = shape.points
@@ -55,9 +51,11 @@ def centerline_length(shape):
     return l
 
 def buildgraph():
-    """
-    Build a networkx graph from centreline and intersection data with weight as length of the street
+    """Build a networkx graph from centreline and intersection data.
+
+    Weight is the length of the street.
     Only the centerline types in tcl_features are considered.
+
     The format of each node is:
      (key): the intersection ID
      lat: Latitude in degrees (WGS84)
@@ -66,6 +64,7 @@ def buildgraph():
     The format of each edge is:
      length: length of the centerline in km (calculated using Haversine on each of its points)
     """
+    
     G = networkx.Graph()
     for intersect in intersect_sf.iterRecords():
         intersect_id = intersect[intersect_id_column]

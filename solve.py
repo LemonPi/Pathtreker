@@ -3,9 +3,7 @@ import route
 import networkx
 
 def solvefile(graph, filename):
-	"""
-	Load file with pairs of intersections and calculate shortest path between them
-	"""
+	"""Load file with pairs of intersections and calculate shortest path between them."""
 	with open(filename, "r", encoding="utf-8") as infile:
 		num = int(infile.readline())
 		costs = [0]*num
@@ -17,6 +15,7 @@ def solvefile(graph, filename):
 	return costs
 
 def testfile(graph, input_name, output_name):
+	"""Test shortest path solver against correct output file."""
 	EPSILON = 0.005 # km
 	costs = solvefile(graph, input_name)
 	costs_reference = costs

@@ -8,14 +8,14 @@ app = Flask(__name__)
 app.debug = True
 app.config.from_object(__name__)
 
-# load serialized graph quickly
+# load serialized graph quickly (takes less than a second from previous time of 37 seconds)
 centerline_graph = picklegraph.load()
 
 # intersection record indices
 name_index = 2
 
 def get_dir(start_inter, end_inter):
-	"""Return direction when given adjacent starting and ending intersections."""
+	"""Return direction of path segment when given adjacent starting and ending intersections."""
 	# compare the difference in longitude and latitude
 	start_lon = centerline_graph.node[start_inter]['lon']
 	start_lat = centerline_graph.node[start_inter]['lat']
@@ -26,7 +26,7 @@ def get_dir(start_inter, end_inter):
 	return get_dir_helper(dlat,dlon)
 
 
-
+# used as turn[in_dir][out_dir] to see which direction to turn
 turn = {
 	"North": {
 		"West":"left",
@@ -49,10 +49,13 @@ turn = {
 
 @app.route('/direction', methods=['GET'])
 def get_direction():
-	"""
+	"""Return JSON instruction object when given starting and ending address.
+
+	Instruction object is documented in doc/backend_api
+
 	Arguments from request:
-	start -- starting address point 
-	end	  -- ending address point
+	start -- starting address name
+	end	  -- ending address name
 	"""
 	start = request.args.get('start')
 	end = request.args.get('end')
@@ -186,8 +189,6 @@ def get_direction():
 
 	return jsonify(instructions)
 	
-
-
 
 if __name__ == '__main__':
     app.run()

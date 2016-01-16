@@ -32,7 +32,7 @@ def getaddress(name):
 	"""
 	address = addresses.get(name, None)
 	if address == None:
-		return None, None, None
+		return None, None, None, None, None
 	inters = streets[address["street"]]
 	dist = address["dist"] / 1000 # to kilometers
 	side = address["side"]
@@ -56,7 +56,7 @@ def address_to_inter(startname, endname):
 	starti, startd, starts, slat, slon = getaddress(startname)
 	endi, endd, ends, elat, elon = getaddress(endname)
 	if starti == None or endi == None:
-		return None, None, None, None, None
+		return None, None, None, None, None, None
 	startedge = gr[starti[0]][starti[1]]
 	endedge = gr[endi[0]][endi[1]]
 	d = None

@@ -8,6 +8,7 @@ body {
 	padding: 0;
 	margin: 0;
 	font-family: sans-serif;
+	overflow:hidden;
 }
 
 html {
@@ -41,7 +42,7 @@ html {
 	/*border:1px solid #18ab29;*/
 	display:inline-block;
 	cursor:pointer;
-	color:;
+	color:white;
 	font-family:Arial;
 	font-size:17px;
 	padding:16px 28px;
@@ -55,4 +56,11 @@ html {
 .sidebutton:active {
 	position:relative;
 	top:1px;
+}
+
+#direction-length {
+	font-weight:bold;
+}
+.distances {
+	color:#808080;
 }
