@@ -24,10 +24,11 @@ to: {
 	name: user-readable name
 	lon: longitude
 	lat: latitude
-	to: "right", "left", "north", "south", "east", or "west"
 }
 
-for Along:
+direction: "right", "left", "north", "south", "east", or "west"
+
+for Along or Arrive:
 distance: (distance in km)
 
 for Arrive:

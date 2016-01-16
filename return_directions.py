@@ -1,6 +1,7 @@
 import route
 import math
 import picklegraph
+from queryaddress import address_to_inter
 from flask import Flask, request, jsonify
 # backend to webapp that returns direction JSON object as defined in doc/backend_api
 app = Flask(__name__)
@@ -73,11 +74,23 @@ def get_direction():
 	print("successfully found shortest path")
 	# based on parent, return certain instructions
 
-	node = end
+	node = end_inter
 	path = []
 	# start with last street
 	prev_street = centerline_graph[parent[node]][node]["street"]
+
+	# going from final intersection to ending address
+	instruct = {}
+	instruct["action"] = "arrive"
+	instruct["side"] = end_side
+	instruct["distance"] = end_dist
+	# assume starting north for now
+	instruct["direction"] = "East"
+	path.append(instruct)
+
+	# do the reste of the travelling
 	while parent[node]: 
+		# we are going from parent[node] -> node
 		print("{}<-{}".format(node, parent[node]))
 		to_inter = centerline_graph.node[node]
 		from_inter = centerline_graph.node[parent[node]]
@@ -86,87 +99,88 @@ def get_direction():
 		cur_street = edge["street"]
 
 		# debugging
-		instructions["path"].append(str(from_inter))
-		instructions["path"].append(str(to_inter))
-		instructions["path"].append(str(edge))
+		# instructions["path"].append(str(from_inter))
+		# instructions["path"].append(str(to_inter))
+		# instructions["path"].append(str(edge))
 
-		# create instruction
-		instruct = {}
-		# arrived at end, give 2 instructions
-		# additional one from final intersection to ending address
-		if node == end_inter:
-			# going from final intersection to ending address
-			instruct["action"] = "arrive"
-			instruct["side"] = end_side
-			instruct["distance"] = end_dist
-			path.append(instruct)
-			# create new one for 2nd instruction
+
+		# turn if street changes
+		if cur_street != prev_street:
+			# update to new turned to street
+			prev_street = cur_street
+			# need to create new instruction
 			instruct = {}
 
-		# turn if street changes, else collect into the same along
-		if cur_street != prev_street:
 			instruct["action"] = "turn"
-			prev_street = cur_street
 			# compare last street's direction and this street's direction
-			from_dir = get_dir(from_inter, to_inter)
+			from_dir = get_dir(parent[node], node)
 			# direction further down the path (previously encountered)
 			to_dir = path[-1]["direction"]
 
 			instruct["direction"] = turn[from_dir][to_dir]
-
-		# not turning, heading along straight
-		else:
-			instruct["action"] = "along"
-			if path[-1]["action"] == "turn":
-				# just turned, need to create new instruction
-				cur_dir = get_dir(from_inter, to_inter)
-				instruct["direction"] = get_dir(from_inter, to_inter)
-				instruct["from"] = {
-					"name":from_inter["record"][name_index],
-					"lon":from_inter["lon"],
-					"lat":from_inter["lat"]
-				}
-				instruct["to"] = {
-					"name":from_inter["record"][name_index],
-					"lon":from_inter["lon"],
-					"lat":from_inter["lat"]
-				}
-				instruct["distance"] = edge["length"]
-				path.append(instruct)
-
-			else:
-				# already along the same direction, just add to distance and update instruction's from intersection
-				instruct = path[-1]
-				instruct["from"] = {
-					"name":from_inter["record"][name_index],
-					"lon":from_inter["lon"],
-					"lat":from_inter["lat"]
-				}
-				instruct["distance"] += edge["length"]				
-
-
-		# arrived at start, give 2 instructions
-		# additional one from initial address to initial intersection
-		if parent[node] == start_inter:
-			# going from initial address to initial intersection
-			instruct["action"] = "along"
-			instruct["distance"] = start_dist
-			# from address
 			instruct["from"] = {
 				"name":from_inter["record"][name_index],
 				"lon":from_inter["lon"],
 				"lat":from_inter["lat"]
 			}
-			# first intersection
 			instruct["to"] = {
+				"name":to_inter["record"][name_index],
+				"lon":to_inter["lon"],
+				"lat":to_inter["lat"]
+			}
+			path.append(instruct)
+		
+		if path[-1]["action"] == "turn":
+			# just turned, need to create new instruction
+			instruct = {}
+			instruct["action"] = "along"
+
+			instruct["direction"] = get_dir(parent[node], node)
+			instruct["from"] = {
 				"name":from_inter["record"][name_index],
 				"lon":from_inter["lon"],
 				"lat":from_inter["lat"]
 			}
+			instruct["to"] = {
+				"name":to_inter["record"][name_index],
+				"lon":to_inter["lon"],
+				"lat":to_inter["lat"]
+			}
+			instruct["distance"] = edge["length"]
+			path.append(instruct)
 
+		else:
+			# already along the same direction, just add to distance and update instruction's from intersection
+			instruct = path[-1]
+			instruct["from"] = {
+				"name":from_inter["record"][name_index],
+				"lon":from_inter["lon"],
+				"lat":from_inter["lat"]
+			}
+			instruct["distance"] += edge["length"]				
 
 		# go on to previous part of track
 		node = parent[node]
+
+	# go from initial address to initial intersection
+	instruct = {}
+	# going from initial address to initial intersection
+	instruct["action"] = "along"
+	instruct["distance"] = start_dist
+	# from address
+	instruct["from"] = {
+		"name":from_inter["record"][name_index],
+		"lon":from_inter["lon"],
+		"lat":from_inter["lat"]
+	}
+	# first intersection
+	instruct["to"] = {
+		"name":from_inter["record"][name_index],
+		"lon":from_inter["lon"],
+		"lat":from_inter["lat"]
+	}
+
+	instructions["path"] = list(reversed(path))
 
 	return jsonify(instructions)
 	
