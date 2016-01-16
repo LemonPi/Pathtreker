@@ -1,7 +1,7 @@
 import route
 import math
 import picklegraph
-from queryaddress import address_to_inter
+from queryaddress import address_to_inter, get_dir_helper
 from flask import Flask, request, jsonify
 # backend to webapp that returns direction JSON object as defined in doc/backend_api
 app = Flask(__name__)
@@ -23,17 +23,9 @@ def get_dir(start_inter, end_inter):
 	end_lat = centerline_graph.node[end_inter]['lat']
 	dlat = end_lat - start_lat
 	dlon = end_lon - start_lon
-	if abs(dlat) > abs(dlon):
-		# more difference along latitude, either N or S
-		if dlat > 0:
-			return "North"
-		else:
-			return "South"
-	else:
-		if dlon > 0:
-			return "East"
-		else:
-			return "West"
+	return get_dir_helper(dlat,dlon)
+
+
 
 turn = {
 	"North": {
@@ -66,7 +58,7 @@ def get_direction():
 	end = request.args.get('end')
 
 	# intersection indices, and distances from address to those intersections
-	start_inter, end_inter, start_dist, end_dist, end_side = address_to_inter(start, end)
+	start_inter, end_inter, start_dist, end_dist, end_side, start_dir = address_to_inter(start, end)
 
 	instructions = {"error":None, "length":-1, "path":[]}
 
@@ -84,8 +76,8 @@ def get_direction():
 	instruct["action"] = "arrive"
 	instruct["side"] = end_side
 	instruct["distance"] = end_dist
-	# assume starting north for now
-	instruct["direction"] = "East"
+	print(start_dir)
+	instruct["direction"] = start_dir
 	path.append(instruct)
 
 	# do the reste of the travelling
@@ -117,7 +109,15 @@ def get_direction():
 			# direction further down the path (previously encountered)
 			to_dir = path[-1]["direction"]
 
-			instruct["direction"] = turn[from_dir][to_dir]
+			try:
+				instruct["direction"] = turn[from_dir][to_dir]
+			except KeyError:
+				print("from {} to {}".format(from_dir, to_dir))
+				if (from_dir == to_dir):
+					instruct["direction"] = "Toward"
+				else:
+					instruct["direction"] = "Around"
+
 			instruct["from"] = {
 				"name":from_inter["record"][name_index],
 				"lon":from_inter["lon"],
@@ -181,6 +181,8 @@ def get_direction():
 	}
 
 	instructions["path"] = list(reversed(path))
+	# from initial address to initial intersection to final intersection to final address
+	instructions["length"] = start_dist + dists[end_inter] + end_dist
 
 	return jsonify(instructions)
 	

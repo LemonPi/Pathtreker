@@ -7,6 +7,8 @@ address_index = loadgraph.getcolumnindex(address_sf, "ADDRESS")
 lfname_index = loadgraph.getcolumnindex(address_sf, "LFNAME")
 arc_side_index = loadgraph.getcolumnindex(address_sf, "ARC_SIDE")
 distance_index = loadgraph.getcolumnindex(address_sf, "DISTANCE")
+lon_index = loadgraph.getcolumnindex(address_sf, "LONGITUDE")
+lat_index = loadgraph.getcolumnindex(address_sf, "LATITUDE")
 
 link_index = loadgraph.getcolumnindex(address_sf, "LINK")
 
@@ -22,7 +24,9 @@ def buildaddress():
 			"name": address + " " + lfname,
 			"street": link,
 			"side": arc_side,
-			"dist": distance
+			"dist": distance,
+			"lon": record[lon_index],
+			"lat": record[lat_index]
 		}
 		addresses[a["name"]] = a
 	return addresses
