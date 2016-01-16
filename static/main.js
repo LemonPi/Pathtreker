@@ -65,7 +65,7 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 		alert(data.error);
 		return;
 	}
-	$("#direction-length").text("Distance: " + rounddist(data.length));
+	$("#direction-length").text("Total distance: " + rounddist(data.length) + '\n');
 	var parts = [];
 	for (var i = 0; i < data.path.length; i++) {
 		var p = data.path[i];
