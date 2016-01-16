@@ -1,6 +1,7 @@
 (function() {
 var shutmedown = false;
 var map;
+var oldPolyline;
 var geocoder;
 
 function geocodeName(geocode) {
@@ -67,10 +68,13 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 	}
 	$("#direction-length").text("Distance: " + rounddist(data.length));
 	var parts = [];
+	var lines = []
 	for (var i = 0; i < data.path.length; i++) {
 		var p = data.path[i];
 		if (p.action == "along") {
 			parts.push($("<div>").text("Head " + p.direction + " along " + p.from.name + " to " + p.to.name));
+			lines.push({lat: p.from.lat, lng: p.from.lon});
+			lines.push({lat: p.to.lat, lng: p.to.lon});
 		} else if (p.action == "turn") {
 			parts.push($("<div>").text("Turn " +
 				p.direction + " onto " + p.to.name));
@@ -82,7 +86,19 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 		}
 		parts.push($("<hr>"));
 	}
-	$("#directions").replaceWith(parts);
+	$("#directions").empty().append(parts);
+	var thepolyline = new google.maps.Polyline({
+		path: lines,
+		geodesic: true,
+		strokeColor: '#FF0000',
+		strokeOpacity: 1.0,
+		strokeWeight: 2
+	});
+	if (oldPolyline != null) {
+		oldPolyline.setMap(null);
+	}
+	thepolyline.setMap(map);
+	oldPolyline = thepolyline;
 }
 
 function initUi() {
