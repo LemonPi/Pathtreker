@@ -8,6 +8,8 @@ Download the Intersections dataset and extract it to centerline-intersection/
 
 Download the Address Points dataset and extract it to address/
 
+Download the Bikeways dataset and extract it to bikeways/
+
 Run `pip install -r requirements.txt` to install required modules
 
 Run these commands to serialize the datasets:
@@ -15,6 +17,7 @@ Run these commands to serialize the datasets:
 python picklegraph.py
 python pickleaddress.py
 python picklestreet.py
+python picklegraph_bike.py
 ```
 
 ### Running Part 1
