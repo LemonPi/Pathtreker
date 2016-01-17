@@ -196,6 +196,10 @@ def get_direction():
 	instructions["length"] = start_dist + dists[end_inter] + end_dist
 
 	return jsonify(instructions)
+
+@app.route("/")
+def root():
+	return open("static/index.html").read()
 	
 
 if __name__ == '__main__':

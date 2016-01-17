@@ -73,7 +73,7 @@ function submitForm() {
 		componentRestrictions: restrictions
 	}, function(results, status) {
 		if (status != google.maps.GeocoderStatus.OK || results.length == 0) {
-			alert("start address is invalid");
+			alert("Start address is invalid.");
 			return;
 		}
 		startResult = results[0];
@@ -82,7 +82,7 @@ function submitForm() {
 			componentRestrictions: restrictions
 		}, function(results, status) {
 			if (status != google.maps.GeocoderStatus.OK || results.length == 0 ) {
-				alert("end address is invalid");
+				alert("End address is invalid.");
 				return;
 			}
 			lastQuery.start = geocodeName(startResult);
@@ -92,7 +92,7 @@ function submitForm() {
 				+ "&end=" + encodeURIComponent(lastQuery.end) + "&bike_mode=" + bike_mode, 
 				handleDirectionResponse, "json")
 			.fail(function() {
-				alert("Network error");
+				alert("Invalid address or network error. Please check that the addresses were valid.");
 			});
 		});
 	});
