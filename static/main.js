@@ -87,8 +87,10 @@ function submitForm() {
 			}
 			lastQuery.start = geocodeName(startResult);
 			lastQuery.end = geocodeName(results[0]);
+			bike_mode = $("#cb4")[0].checked;
 			$.get("/direction", "start=" + encodeURIComponent(lastQuery.start)
-				+ "&end=" + encodeURIComponent(lastQuery.end), handleDirectionResponse, "json")
+				+ "&end=" + encodeURIComponent(lastQuery.end) + "&bike_mode=" + bike_mode, 
+				handleDirectionResponse, "json")
 			.fail(function() {
 				alert("Network error");
 			});
@@ -107,7 +109,14 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 		alert(data.error);
 		return;
 	}
-	$("#direction-length").text("Total distance: " + rounddist(data.length) + '\n');
+	var mult = 1;
+	if ($("#cb4")[0].checked) {
+		mult = 2;
+		$("#direction-length").text("Total distance (approx): " + rounddist(data.length*2) + '\n');
+	}
+	else {
+		$("#direction-length").text("Total distance: " + rounddist(data.length) + '\n');
+	}
 	var parts = [];
 	var lines = [];
 	var bounds = new google.maps.LatLngBounds();
@@ -126,7 +135,8 @@ function handleDirectionResponse(data, textStatus, jqXHR) {
 			parts.push($("<div>").text(lastQuery.end + " is on the " + sides[p.side]));
 		}
 		if (p.distance) {
-			parts.push($("<div>").text("(" + rounddist(p.distance) + ")").addClass("distances"));
+
+			parts.push($("<div>").text("(" + rounddist(p.distance*mult) + ")").addClass("distances"));
 		}
 		parts.push($("<hr>"));
 	}

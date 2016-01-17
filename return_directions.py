@@ -1,6 +1,7 @@
 import route
 import math
 import picklegraph
+import picklegraph_bike
 from queryaddress import address_to_inter, get_dir_helper
 from flask import Flask, request, jsonify
 # backend to webapp that returns direction JSON object as defined in doc/backend_api
@@ -10,17 +11,18 @@ app.config.from_object(__name__)
 
 # load serialized graph quickly (takes less than a second from previous time of 37 seconds)
 centerline_graph = picklegraph.load()
+bikelane_graph = picklegraph_bike.load()
 
 # intersection record indices
 name_index = 2
 
-def get_dir(start_inter, end_inter):
+def get_dir(g, start_inter, end_inter):
 	"""Return direction of path segment when given adjacent starting and ending intersections."""
 	# compare the difference in longitude and latitude
-	start_lon = centerline_graph.node[start_inter]['lon']
-	start_lat = centerline_graph.node[start_inter]['lat']
-	end_lon = centerline_graph.node[end_inter]['lon']
-	end_lat = centerline_graph.node[end_inter]['lat']
+	start_lon = g.node[start_inter]['lon']
+	start_lat = g.node[start_inter]['lat']
+	end_lon = g.node[end_inter]['lon']
+	end_lat = g.node[end_inter]['lat']
 	dlat = end_lat - start_lat
 	dlon = end_lon - start_lon
 	return get_dir_helper(dlat,dlon)
@@ -56,23 +58,29 @@ def get_direction():
 	Arguments from request:
 	start -- starting address name
 	end	  -- ending address name
+	bike_mode -- true or false, decides which graph to use
 	"""
 	start = request.args.get('start')
 	end = request.args.get('end')
+	bike_mode = request.args.get('bike_mode')
+	if bike_mode:
+		print("using bike mode")
 
 	# intersection indices, and distances from address to those intersections
 	start_inter, end_inter, start_dist, end_dist, end_side, start_dir = address_to_inter(start, end)
 
 	instructions = {"error":None, "length":-1, "path":[]}
 
-	dists, parent = route.shortest_path(centerline_graph, start_inter, end_inter)
+	working_graph = bikelane_graph if bike_mode == "true" else centerline_graph
+
+	dists, parent = route.shortest_path(working_graph, start_inter, end_inter)
 	print("successfully found shortest path")
 	# based on parent, return certain instructions
 
 	node = end_inter
 	path = []
 	# start with last street
-	prev_street = centerline_graph[parent[node]][node]["street"]
+	prev_street = working_graph[parent[node]][node]["street"]
 
 	# going from final intersection to ending address
 	instruct = {}
@@ -87,9 +95,9 @@ def get_direction():
 	while parent[node]: 
 		# we are going from parent[node] -> node
 		print("{}<-{}".format(node, parent[node]))
-		to_inter = centerline_graph.node[node]
-		from_inter = centerline_graph.node[parent[node]]
-		edge = centerline_graph[parent[node]][node]
+		to_inter = working_graph.node[node]
+		from_inter = working_graph.node[parent[node]]
+		edge = working_graph[parent[node]][node]
 
 		cur_street = edge["street"]
 
@@ -108,7 +116,7 @@ def get_direction():
 
 			instruct["action"] = "turn"
 			# compare last street's direction and this street's direction
-			from_dir = get_dir(parent[node], node)
+			from_dir = get_dir(working_graph, parent[node], node)
 			# direction further down the path (previously encountered)
 			to_dir = path[-1]["direction"]
 
@@ -138,7 +146,7 @@ def get_direction():
 			instruct = {}
 			instruct["action"] = "along"
 
-			instruct["direction"] = get_dir(parent[node], node)
+			instruct["direction"] = get_dir(working_graph, parent[node], node)
 			instruct["from"] = {
 				"name":from_inter["record"][name_index],
 				"lon":from_inter["lon"],
